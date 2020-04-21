@@ -117,8 +117,8 @@ module Deliver
       validate_html(screenshots)
 
       # Commit
-      upload_metadata.upload(options)
       upload_screenshots.upload(options, screenshots)
+      upload_metadata.upload(options)
       UploadPriceTier.new.upload(options)
       UploadAssets.new.upload(options) # e.g. app icon
     end
