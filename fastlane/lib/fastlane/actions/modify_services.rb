@@ -5,6 +5,7 @@ module Fastlane
         require 'produce'
 
         Produce.config = params
+        Spaceship::ConnectAPI.login(Produce.config[:username], nil, use_portal: true, use_tunes: false)
 
         Dir.chdir(FastlaneCore::FastlaneFolder.path || Dir.pwd) do
           require 'produce/service'
