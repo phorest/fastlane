@@ -7,7 +7,27 @@ module Fastlane
         truncated_value = value[0..800].gsub(/\s\w+\s*$/, '...')
         UI.message("Storing '#{truncated_value}' in the clipboard 🎨")
 
-        FastlaneCore::Clipboard.copy(content: value)
+        copy_to_clipboard(value)
+      end
+
+      #####################################################
+      # Helper Methods
+      #####################################################
+
+      def self.copy_to_clipboard(content)
+        if RbConfig::CONFIG['host_os'] =~ /darwin/ # macOS
+          IO.popen('pbcopy', 'w') { |clip| clip.write(content) }
+        elsif RbConfig::CONFIG['host_os'] =~ /linux/ # Linux
+          if system('command -v xclip > /dev/null') # Check if xclip is available
+            IO.popen(['xclip', '-selection', 'clipboard'], 'w') { |clip| clip.write(content) }
+          elsif system('command -v xsel > /dev/null') # Check if xsel is available
+            IO.popen(['xsel', '--clipboard', '--input'], 'w') { |clip| clip.write(content) }
+          else
+            UI.error("Neither 'xclip' nor 'xsel' is installed. Install one of these tools to use clipboard functionality.")
+          end
+        else
+          UI.error("Clipboard functionality is not supported on this OS.")
+        end
       end
 
       #####################################################
@@ -15,7 +35,7 @@ module Fastlane
       #####################################################
 
       def self.description
-        "Copies a given string into the clipboard. Works only on macOS"
+        "Copies a given string into the clipboard. Works on macOS and Linux"
       end
 
       def self.available_options
@@ -31,7 +51,7 @@ module Fastlane
       end
 
       def self.is_supported?(platform)
-        FastlaneCore::Clipboard.is_supported?
+        true # Supports all platforms
       end
 
       def self.example_code
